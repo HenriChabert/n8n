@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+		"allowJs": true,
+    "module": "esnext",
+    "target": "esnext",
+    "lib": ["DOM", "ESNext"],
+    "strict": true,
+    "esModuleInterop": true,
+    "incremental": false,
+    "skipLibCheck": true,
+    "jsx": "preserve",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "noUnusedLocals": true,
+    "forceConsistentCasingInFileNames": true,
+    "types": [
+      "vite/client"
+    ],
+    "typeRoots": ["./node_modules/@types/", "./types", "./node_modules"],
+    "paths": {
+			"@/*": ["src/*"],
+			"n8n-design-system/*": ["../design-system/src/*"]
+    }
+  },
+  "exclude": ["dist", "node_modules"]
+}
