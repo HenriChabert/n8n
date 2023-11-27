@@ -343,6 +343,7 @@
 	--spacing-5xl: 16rem;
 }
 
-:root {
+:root,
+:host {
 	@include theme;
 }

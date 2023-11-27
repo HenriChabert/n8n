@@ -417,6 +417,7 @@
 	);
 }
 
-:root {
+:root,
+:host {
 	@include primitives;
 }
