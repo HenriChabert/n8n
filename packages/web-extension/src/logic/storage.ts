@@ -1,3 +1,3 @@
-import { useStorageLocal } from '@/composables/useStorageLocal'
+import { useStorageLocal } from '~/composables/useStorageLocal';
 
-export const storageN8NUrl = useStorageLocal('n8n-url', null)
+export const storageN8NUrl = useStorageLocal('n8n-url', null);

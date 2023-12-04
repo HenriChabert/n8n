@@ -1,30 +1,64 @@
 <script setup lang="ts">
-import { useToggle } from '@vueuse/core'
-import 'uno.css'
+import { useGlobalStore } from '~/shared/stores/global.store';
+import N8nText from 'n8n-design-system/components/N8nText';
 
-const [show, toggle] = useToggle(false)
+const globalStore = useGlobalStore();
+
+const props = withDefaults(
+	defineProps<{
+		isOpened: boolean;
+	}>(),
+	{
+		isOpened: false,
+	},
+);
+
+defineEmits(['blur']);
 </script>
 
 <template>
-    <div class="fixed right-0 bottom-0 m-5 z-100 flex items-end font-sans select-none leading-1em">
-        <div
-        class="bg-white text-gray-800 rounded-lg shadow w-max h-min"
-        p="x-4 y-2"
-        m="y-auto r-2"
-        transition="opacity duration-300"
-        :class="show ? 'opacity-100' : 'opacity-0'"
-        >
-        <h1 class="text-lg">
-            Vitesse WebExt
-        </h1>
-        <SharedSubtitle />
-    </div>
-    <button
-    class="flex w-10 h-10 rounded-full shadow cursor-pointer border-none"
-    bg="teal-600 hover:teal-700"
-    @click="toggle()"
-    >
-    <pixelarticons-power class="block m-auto text-white text-lg" />
-</button>
-</div>
+	<div class="sidebar-layout" v-if="props.isOpened" @blur="$emit('blur', $event)">
+		<slot></slot>
+
+		<div class="footer">
+			<n8n-text size="small" class="unofficial-disclaimer" align="center"
+				>*This is an <b>unofficial</b> N8N extension</n8n-text
+			>
+			<n8n-text siz="small" class="version">{{ globalStore.version }}</n8n-text>
+		</div>
+	</div>
 </template>
+
+<style lang="scss">
+$sidebar-width: 30vw;
+
+.sidebar-layout {
+	width: $sidebar-width;
+	height: 100vh;
+	position: fixed;
+	right: 0;
+	top: 0;
+	background-color: var(--color-background-light);
+	z-index: 10000;
+	box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+	pointer-events: auto;
+	padding: var(--spacing-m) var(--spacing-l) var(--spacing-m) var(--spacing-l);
+}
+
+.footer {
+	position: absolute;
+	width: 100%;
+	bottom: 0;
+	left: 0;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	color: var(--color-text-light);
+	padding: inherit;
+
+	.version {
+		align-self: end;
+	}
+}
+</style>
