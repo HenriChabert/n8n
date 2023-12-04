@@ -9,6 +9,7 @@ import { FontAwesomePlugin } from '~/plugins/icons';
 import fontAwesomeCSS from '@fortawesome/fontawesome-svg-core/styles.css?inline';
 
 import { N8nPlugin } from 'n8n-design-system/plugin';
+import { Plugin } from 'vue';
 
 function addStylesheetFromUrl(shadowDOM: ShadowRoot, path: string) {
 	const styleEl = document.createElement('link');
@@ -43,7 +44,7 @@ function addStylesheetFromContent(shadowDOM: ShadowRoot, content: string) {
 	const app = createApp(App);
 	setupApp(app);
 	app.use(pinia);
-	app.use(N8nPlugin);
+	app.use(N8nPlugin as unknown as Plugin<[]>);
 	app.use(FontAwesomePlugin);
 	app.mount(root);
 	console.log('App mounted !');

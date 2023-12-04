@@ -1,8 +1,10 @@
 import { onMessage, sendMessage } from 'webext-bridge/background';
 import type { Tabs } from 'webextension-polyfill';
-import N8NApiHandler from '../shared/n8n-api';
+import n8nApi from '~/shared/n8n-api';
 import { storageN8NUrl } from '~/logic/storage';
-import { registerListeners } from './messages-registry';
+import { registerListeners } from './messages-handlers';
+
+import { MessageRegistry } from '~/shared/intercom/messages-registry';
 
 // only on dev mode
 if (import.meta.hot) {
@@ -11,8 +13,6 @@ if (import.meta.hot) {
 	// load latest content script
 	import('./contentScriptHMR');
 }
-
-const n8nApi = new N8NApiHandler('https://n8n.app-moba.com/');
 
 browser.runtime.onInstalled.addListener((): void => {
 	// eslint-disable-next-line no-console
@@ -28,7 +28,7 @@ browser.action.onClicked.addListener(async ({ id }) => {
 	}
 
 	console.log('Sent message in BE');
-	sendMessage('TOGGLE_SIDEBAR', undefined, `content-script@${id}`);
+	sendMessage(MessageRegistry.ContentScript.TOGGLE_SIDEBAR, undefined, `content-script@${id}`);
 });
 
 // communication example: send previous tab title from background page

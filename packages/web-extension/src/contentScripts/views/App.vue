@@ -41,6 +41,7 @@ onMessage('TOGGLE_SIDEBAR', () => {
 
 <style lang="scss">
 .app-container {
+	font-family: var(--fon);
 	position: fixed;
 	left: 0;
 	top: 0;

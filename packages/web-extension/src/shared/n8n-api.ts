@@ -1,8 +1,4 @@
-interface ApiResponse<T = any> {
-	success: boolean;
-	data?: T;
-	error?: string;
-}
+import { ApiResponse, ApiRequestOptions, ServerHealth } from '~/Interface';
 
 class N8NApiHandler {
 	private baseURL?: string = undefined;
@@ -33,32 +29,59 @@ class N8NApiHandler {
 		};
 	}
 
-	private async request<T>(method: string, url: string, data?: any): Promise<ApiResponse<T>> {
-		if (!this.baseURL) {
+	private async request<T>(
+		method: string,
+		endpoint: string,
+		data?: any,
+		options?: ApiRequestOptions,
+	): Promise<ApiResponse<T>> {
+		let baseUrl;
+		if (options?.serverUrl) {
+			baseUrl = this.cleanBaseUrl(options.serverUrl);
+		} else {
+			baseUrl = this.baseURL;
+		}
+		if (!baseUrl) {
 			return this.baseURlMissingError();
 		}
+		const url = `${baseUrl}/${endpoint}`;
+		const headers = {
+			'Content-Type': 'application/json',
+		};
+
+		const body = data ? JSON.stringify(data) : undefined;
+
+		let returnResponse: ApiResponse;
+
 		try {
-			const response = await fetch(`${this.baseURL}${url}`, {
+			console.debug('Running following request: ');
+			console.debug({ url, method, headers, body });
+			const response = await fetch(url, {
 				method,
-				headers: {
-					'Content-Type': 'application/json',
-					// Add any other headers you may need
-				},
-				body: data ? JSON.stringify(data) : undefined,
+				headers,
+				body,
 			});
+			console.debug('Request succeeded with response: ');
+			console.debug({ response });
+
 			const responseData = await this.handleSuccessResponse(response);
-			return { success: true, data: responseData };
+			returnResponse = { success: true, data: responseData } as ApiResponse;
 		} catch (error: any) {
-			return this.handleErrorResponse(error);
+			console.debug('Request failed with error: ');
+			console.debug({ error });
+
+			returnResponse = this.handleErrorResponse(error);
 		}
+
+		return returnResponse;
 	}
 
-	public get<T>(url: string): Promise<ApiResponse<T>> {
-		return this.request<T>('GET', url);
+	public get<T>(url: string, options?: ApiRequestOptions): Promise<ApiResponse<T>> {
+		return this.request<T>('GET', url, undefined, options);
 	}
 
-	public post<T>(url: string, data?: any): Promise<ApiResponse<T>> {
-		return this.request<T>('POST', url, data);
+	public post<T>(url: string, data?: any, options?: ApiRequestOptions): Promise<ApiResponse<T>> {
+		return this.request<T>('POST', url, data, options);
 	}
 
 	private handleSuccessResponse(response: Response): Promise<any> {
@@ -72,20 +95,32 @@ class N8NApiHandler {
 		return { success: false, error: error.message };
 	}
 
-	public async healthCheck() {
+	public async healthCheck(serverUrl?: string): Promise<ServerHealth> {
+		if (!serverUrl) {
+			return ServerHealth.NO_URL;
+		}
 		const url = 'healthz';
-		return await this.get(url);
+		const serverHealthResponse = (await this.get(url, { serverUrl })) as ApiResponse<{
+			status: 'ok' | 'nok';
+		}>;
+
+		if (serverHealthResponse?.success && serverHealthResponse.data?.status === 'ok') {
+			return ServerHealth.UP;
+		} else {
+			return ServerHealth.DOWN;
+		}
 	}
 
-	public async login() {
+	public async login(): Promise<ApiResponse<{ cookie: string }>> {
 		const url = this.restEndpoint('login');
 		return await this.get(url);
 	}
 
-	public async listWorkflows() {
+	public async listWorkflows(): Promise<ApiResponse<{ workflows: [any] }>> {
 		const url = this.restEndpoint('workflows');
 		return await this.get(url);
 	}
 }
 
-export default N8NApiHandler;
+const n8nApi = new N8NApiHandler();
+export default n8nApi;
